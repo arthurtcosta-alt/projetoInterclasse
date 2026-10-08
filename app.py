@@ -11,14 +11,14 @@ app.secret_key = "chave-secreta-interclasse-2026"
 
 @app.route("/")
 def dashboard():
-    times = tabela_time.select_todos_times()
-    jogadores = tabela_jogador.select_todos_jogadores()
-    partidas = tabela_partida.select_todas_partidas()
+    times = tabela_time.select_quantidade_total()
+    jogadores = tabela_jogador.select_quantidade_total()
+    partidas = tabela_partida.select_quantidade_total()
     return render_template(
         "dashboard.html",
-        total_jogadores=len(jogadores),
-        total_times=len(times),
-        total_partidas=len(partidas),
+        total_jogadores=jogadores,
+        total_times=times,
+        total_partidas= partidas,
         proximas_partidas=0,
         times_ranking=0,
     )
@@ -39,20 +39,18 @@ def novo_jogador():
         # 2- verificar c foi digitalizado
         if not nome:
             flash('Digite o nome do jogador', 'error')
-            return redirect(url_for("novo_jogador"))
+            return redirect(url_for(novo_jogador))
         if not numero_camisa:
             flash('Digite numero do jogador', 'error')
-            return rediredirect(url_for(novo_time))
+            return redirect(url_for(novo_jogador))
         if not posicao:
             flash('Digite a posição do jogador ', 'error')
-            return redirect(url_for("novo_jogador"))
+            return redirect(url_for(novo_jogador))
         if not time_id:
             flash('Digite o time do jogador ', 'error')
-            return redirect(url_for("novo_jogador"))
-        tabela_jogador.salvar(nome=nome, numero_camisa=numero_camisa,posicao=posicao, time_id=time_id)
-        jogadores = tabela_jogador.select_todos_jogadores()
-        tabela_time.salvar(nome=nome, turma=turma, responsavel=responsavel)
-        times = tabela_time.select_todos_times()
+            return redirect(url_for(novo_jogador))
+    jogadores = tabela_jogador.select_todos_jogadores()
+    times = tabela_time.select_todos_times()
     return render_template("jogadores.html", times=times, jogadores=jogadores)
 @app.route("/times")
 def listar_times():
@@ -88,9 +86,7 @@ def novo_time():
 
 @app.route("/partidas")
 def listar_partidas():
-    partidas_sql = select(Partida)  # não é a lista de times ainda
-    # 2- executar o SELECT
-    partidas = db_session.execute(partidas_sql).scalars().all()  # agora sim é a lista
+    partidas = tabela_partida.select_todas_partidas()  # agora sim é a lista
     print(partidas)
     return render_template("partidas.html", partidas=partidas)
 
@@ -122,11 +118,14 @@ def nova_partida():
         if time_casa_id == time_visitante_id:
             flash("Selecione times diferentes", "error")
             return redirect(url_for(nova_partida))
+
+        # 3
         tabela_partida.salvar(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida)
-        times = tabela_time.select_todos_times()
+    times = tabela_time.select_todos_times()
+    partidas = tabela_partida.select_todas_partidas()
 
 
-    return render_template("partidas.html", partidas=parti, times=times)
+    return render_template("partidas.html", partidas=partidas, times=times)
 
 
 if __name__ == "__main__":
