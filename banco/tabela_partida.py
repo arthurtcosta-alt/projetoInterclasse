@@ -35,3 +35,12 @@ def salvar(time_casa_id, time_visitante_id, gols_casa, gols_visitante, data_part
         db_session.rollback()
         flash('ocorreu um erro, tente novamente', 'error')
         print(f"Erro: {e}")
+def select_por_time(id_time):
+    Timecasa = aliased(Time)
+    Timevisitante = aliased(Time)
+    partidas_sql = (select(Partida, Timecasa, Timevisitante)
+                    .join(Timecasa, Partida.time_casa_id == Timecasa.id)
+                    .join(Timevisitante, Partida.time_visitante_id == Timevisitante.id)).where(or_(Partida.time_casa_id == id_time, Partida.time_visitante_id == id_time))
+    # 2- executar o SELECT
+    partidas_casa = db_session.execute(partidas_sql).all()  # agora sim é a lista
+    return partidas_casa

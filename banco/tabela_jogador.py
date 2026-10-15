@@ -33,3 +33,14 @@ def salvar(nome, numero_camisa, posicao, time_id):
         db_session.rollback()
         flash('ocorreu um erro, tente novamente', 'error')
         print(f"Erro: {e}")
+
+def select_um(id_jogador):
+    jogador_sql = select(Jogador).where(Jogador.id == id_jogador)
+    jogador = db_session.execute(jogador_sql).scalar_one_or_none()
+    return jogador
+print(select_um(10))
+def select_por_time(id_time):
+    jogador_sql = select(Jogador).where(id_time == Jogador.time_id)
+    jogador = db_session.execute(jogador_sql).scalars().all()
+    return jogador
+print(select_por_time(1))
